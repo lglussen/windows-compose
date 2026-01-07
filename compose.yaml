@@ -1,0 +1,32 @@
+volumes:
+  data:
+services:
+  windows:
+    image: dockurr/windows
+    container_name: windows
+    environment:
+      VERSION: "11"
+      USERNAME: "${USER}"
+      PASSWORD: "${WINDOWS_USER_PASSWORD}"
+      HOME: "${HOME}"
+      DISK_SIZE: "64G"
+      RAM_SIZE: "10G"
+      CPU_CORES: "2"
+    devices:
+      - /dev/kvm
+      - /dev/net/tun
+    cap_add:
+      - NET_ADMIN
+    ports:
+      - 8006:8006
+      - 3389:3389/tcp
+      - 3389:3389/udp
+    volumes:
+      - data:/storage
+      #- ${HOME}/Downloads/Win11_24H2_English_x64.iso:/boot.iso:z
+      - ${HOME}/shared:/shared:z
+      - ./setup:oem:z
+    restart: always
+    stop_grace_period: 2m
+    group_add:
+      - keep-groups
