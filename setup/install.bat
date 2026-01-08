@@ -1,16 +1,14 @@
 @echo off
 
-REM Download LightBurn Application ############################################
-SET URL="https://release.lightburnsoftware.com/LightBurn/Release/LightBurn-v2.0.05/LightBurn-v2.0.05.exe"
-SET Destination="%UserProfile%\Downloads\lightburn.exe"
+echo Download and Install Software ===========================================
+PowerShell.exe -ExecutionPolicy Bypass -File %~dp0software-install.ps1
 
-IF NOT EXIST "%Destination%" (
-  PowerShell -Command "Invoke-WebRequest" -Uri %URL% -OutFile "%Destination%"
-)
+echo Configure Prefered General Windows Settings ==============================
+PowerShell.exe -ExecutionPolicy Bypass -File %~dp0Configure.ps1
+rundll32.exe user32.dll, UpdatePerUserSystemParameters
 
-
-REM Enable File Extensions ####################################################
-REG ADD "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v "HideFileExt" /t REG_DWORD /d 0 /f
-
-REM Remove OneDrive ###########################################################
+echo Remove OneDrive ==========================================================
 call %~dp0RemoveOneDrive.bat
+
+echo Reboot ===================================================================
+shutdown -r
