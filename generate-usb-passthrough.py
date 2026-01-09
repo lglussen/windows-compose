@@ -18,13 +18,14 @@ compose = yaml.load("""
 services:
     windows: 
         environment: {} 
-        devices: []
+        devices:
+          - /dev/bus/usb
 """)
 
 device_index = 0
 fold_pos = []
 ARGUMENTS = ""
-
+usbcomments = [ "USB device names:" ]
 for line in result.stdout.split('\n'):
     m = re.match(r'Bus ([\d]+) Device ([\d]+): ID ([\da-z]+):([\da-z]+)[\s]*(.*)', line)
     if m:
@@ -35,9 +36,10 @@ for line in result.stdout.split('\n'):
           'name': m.group(5).strip()
         }
         
-        compose['services']['windows']["devices"].append(data['device'])
-        compose['services']['windows']["devices"].yaml_add_eol_comment(data['name'], device_index)
-         
+        #compose['services']['windows']["devices"].append(data['device'])
+        #compose['services']['windows']["devices"].yaml_add_eol_comment(data['name'], device_index)
+        usbcomments.append(f" ({data['vendorid']}:{data['productid']})  {data['name']}")
+
         device = f'-device usb-host,vendorid={data["vendorid"]},productid={data["productid"]} '
         ARGUMENTS += device
         device_index += 1
@@ -47,9 +49,10 @@ for line in result.stdout.split('\n'):
 del fold_pos[-1]
 args = FoldedScalarString(ARGUMENTS)
 args.fold_pos = fold_pos
+
 compose['services']['windows']['environment']['ARGUMENTS'] = args
-compose['services']['windows']['environment'].yaml_set_start_comment("Ordered to match devices entries (for convenience).\nDevice and Vendor ID values found using `lsusb`", indent=4)
-compose['services']['windows']["devices"].yaml_set_start_comment("formatted as '/dev/bus/usb/{Bus}/{Device}' with values from `lsusb`.\nDevice name comments provided for convenience", indent=4)
+compose['services']['windows']['environment'].yaml_set_start_comment("\n".join(usbcomments), indent=6)
+#compose['services']['windows']["devices"].yaml_set_start_comment("formatted as '/dev/bus/usb/{Bus}/{Device}' with values from `lsusb`.\nDevice name comments provided for convenience", indent=4)
 
 yaml.dump(compose, sys.stdout)
 #print(compose)
