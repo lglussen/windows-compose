@@ -33,7 +33,7 @@ function Install-App {
 function LightBurn-Download-URI {
     foreach ($link in (Invoke-WebRequest -Uri https://release.lightburnsoftware.com/LightBurn/Release/latest/).links.href) {
         if ($link -match "\.exe$"){
-            return "https://release.lightburnsoftware.com/$link"
+            return "https://release.lightburnsoftware.com$link"
         }
     }
 }
